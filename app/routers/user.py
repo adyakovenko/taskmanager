@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.backend import db_depends
 # Аннотации, Модели БД и Pydantic.
 from typing import Annotated
-from app.models import User
+from app.models import *
 from app.schemas import CreateUser, UpdateUser
 # Функции работы с записями.
 from sqlalchemy import insert, select, update, delete
@@ -48,17 +48,17 @@ async def create_user(db: Annotated[Session, Depends(db_depends.get_db)], create
 
 
 @router.put('/update')
-async def update_user(db: Annotated[Session, Depends(db_depends.get_db)], user_id: int, create_user: CreateUser):
+async def update_user(db: Annotated[Session, Depends(db_depends.get_db)], user_id: int, update_user: UpdateUser):
     user = db.scalar(select(User).where(User.id == user_id))
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail='User not found'
         )
-    db.execute(update(User).where(User.id == user_id).values(username=create_user.username,
-                                                             firstname=create_user.firstname,
-                                                             lastname=create_user.lastname,
-                                                             age=create_user.age))
+    db.execute(update(User).where(User.id == user_id).values(username=update_user.username,
+                                                             firstname=update_user.firstname,
+                                                             lastname=update_user.lastname,
+                                                             age=update_user.age))
     db.commit()
     return {
         'status_code': status.HTTP_200_OK,
